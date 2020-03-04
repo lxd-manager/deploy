@@ -1,0 +1,25 @@
+[http.routers]
+  [http.routers.redirecttohttps]
+    entryPoints = ["web"]
+    middlewares = ["httpsredirect"]
+    rule = "HostRegexp(`{host:.+}`)"
+    service = "noop"
+  #[http.routers.dashboard]
+  #  rule = "Host(`traefik.example.net`)"
+  #  service="api@internal"
+  #  middlewares = ["auth"]
+  #  [http.routers.dashboard.tls]
+  #    certresolver="le"
+
+
+[http.services]
+  # noop service, the URL will be never called
+  [http.services.noop.loadBalancer]
+    [[http.services.noop.loadBalancer.servers]]
+      url = ""
+
+[http.middlewares]
+  [http.middlewares.httpsredirect.redirectScheme]
+    scheme = "https"
+  #[http.middlewares.auth.basicauth]
+  #  users = ["dashboard:htaccesspw"]

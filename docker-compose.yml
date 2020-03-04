@@ -1,0 +1,183 @@
+version: '3.1'
+
+services:
+  reverse-proxy:
+    # The official v2.0 Traefik docker image
+    image: traefik
+    # Enables the web UI and tells Traefik to listen to docker
+    #command: --api.insecure=true --providers.docker
+    #command: --logLevel=DEBUG
+    ports:
+      # The HTTP port
+      - "80:80"
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      #- "8080:8080"
+    networks:
+      - web
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./acme:/acme
+      - './traefik.toml:/etc/traefik/traefik.toml'
+      - './redirect.toml:/etc/traefik/redirect.toml'
+ 
+  redis:
+    restart: always
+    image: redis:latest
+    #expose:
+    #  - "6379"
+    networks:
+      - backend
+  
+  celery:
+    restart: always
+    # Docker hack to wait until Postgres is up, then run stuff.
+    command: /usr/local/bin/celery -A ct_backend.celery worker
+    image: backend-image
+    volumes:
+      - ./certs:/data/django/certs
+    networks:
+      - backend
+    depends_on:
+      - database
+      - api
+      - redis
+    environment:
+      DB_NAME: ctapi
+      DB_USER: ctapi
+      DB_SERVICE: database
+      CONF_CELERY_BROKER_URL: "redis://redis:6379"
+      CONF_CELERY_RESULT_BACKEND: "redis://redis:6379"
+    secrets:
+      - db_pass
+      - fernet_keys
+      - social_auth_gitlab_key
+      - social_auth_gitlab_secret
+
+  beat:
+    restart: always
+    # Docker hack to wait until Postgres is up, then run stuff.
+    command: /usr/local/bin/celery -A ct_backend.celery beat
+    image: backend-image
+    networks:
+      - backend
+    depends_on:
+      - database
+      - api
+      - redis
+    environment:
+      DB_NAME: ctapi
+      DB_USER: ctapi
+      DB_SERVICE: database
+      CONF_CELERY_BROKER_URL: "redis://redis:6379"
+      CONF_CELERY_RESULT_BACKEND: "redis://redis:6379"
+    secrets:
+      - db_pass
+      - fernet_keys
+      - social_auth_gitlab_key
+      - social_auth_gitlab_secret
+
+  api:
+    image: backend-image
+    volumes:
+      - webstatic:/data/django/static
+      - ./certs:/data/django/certs
+    networks:
+      - backend
+    command: /bin/sh -c "while ! nc -w 1 -z database 5432; do sleep 0.1; done; python3 manage.py migrate; python3 manage.py collectstatic --noinput; /usr/local/bin/gunicorn ct_backend.wsgi:application -w 5 --timeout 120 -b :8000"
+    environment:
+      DB_NAME: ctapi
+      DB_USER: ctapi
+      DB_SERVICE: database
+      CONF_CELERY_BROKER_URL: "redis://redis:6379"
+      CONF_CELERY_RESULT_BACKEND: "redis://redis:6379"
+    secrets:
+      - fernet_keys
+      - db_pass
+      - social_auth_gitlab_key
+      - social_auth_gitlab_secret
+
+  dns:
+    image: backend-image
+    networks:
+      - backend
+    command: python3 dns/server.py
+    environment:
+      DB_NAME: ctapi
+      DB_USER: ctapi
+      DB_SERVICE: database
+      DNS_BASE_DOMAIN: "service-fqdn."
+      DNS_CONTAINER_DOMAIN: "ct-subdomain."
+    secrets:
+      - db_pass
+      - fernet_keys
+      - social_auth_gitlab_key
+      - social_auth_gitlab_secret
+    ports:
+      - "server-ip:53:53/udp"
+
+
+  database:
+    # Don't upgrade PostgreSQL by simply changing the version number
+    # You need to migrate the Database to the new PostgreSQL version
+    image: postgres:12
+    #read_only: true          # not supported in swarm mode please enable along with tmpfs
+    #tmpfs:
+    #  - /run/postgresql:size=512K
+    #  - /tmp:size=256K
+    environment:
+      - POSTGRES_USER=ctapi
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_pass 
+      - POSTGRES_DB=ctapi
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks:
+      backend:
+    restart: always
+    secrets:
+      - db_pass
+
+  nginx:
+    restart: always
+    image: gui-image:latest
+    volumes:
+      - ./sites-enabled:/etc/nginx/conf.d
+      - webstatic:/data/django/static
+    #ports:
+    #    - "80:80"
+    expose:
+      - "80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`service-fqdn`)"
+      - "traefik.http.routers.api.service=api"
+      - "traefik.http.services.api.loadbalancer.server.port=80"
+      - "traefik.http.routers.api.entryPoints=websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=le"
+    depends_on:
+      - api
+    networks:
+      - backend
+      - web
+
+volumes:
+  # Volume for PostgreSQL/MySQL database
+  database:
+  webstatic:
+          
+networks: 
+  web: 
+    external: true
+  backend:
+
+secrets:
+  db_pass:
+    file: secrets/ct_postgres
+  fernet_keys:
+    file: secrets/db_encrypt
+  social_auth_gitlab_key:
+    file: secrets/gitlab_id
+  social_auth_gitlab_secret:
+    file: secrets/gitlab_secret
