@@ -34,7 +34,7 @@ services:
     restart: always
     # Docker hack to wait until Postgres is up, then run stuff.
     command: /usr/local/bin/celery -A ct_backend.celery worker
-    image: backend-image
+    image: docker.pkg.github.com/lxd-manager/backend/api:latest
     volumes:
       - ./certs:/data/django/certs
     networks:
@@ -59,7 +59,7 @@ services:
     restart: always
     # Docker hack to wait until Postgres is up, then run stuff.
     command: /usr/local/bin/celery -A ct_backend.celery beat
-    image: backend-image
+    image: docker.pkg.github.com/lxd-manager/backend/api:latest
     networks:
       - backend
     depends_on:
@@ -79,7 +79,7 @@ services:
       - social_auth_gitlab_secret
 
   api:
-    image: backend-image
+    image: docker.pkg.github.com/lxd-manager/backend/api:latest
     volumes:
       - webstatic:/data/django/static
       - ./certs:/data/django/certs
@@ -99,7 +99,7 @@ services:
       - social_auth_gitlab_secret
 
   dns:
-    image: backend-image
+    image: docker.pkg.github.com/lxd-manager/backend/api:latest
     networks:
       - backend
     command: python3 dns/server.py
@@ -107,8 +107,8 @@ services:
       DB_NAME: ctapi
       DB_USER: ctapi
       DB_SERVICE: database
-      DNS_BASE_DOMAIN: "service-fqdn."
-      DNS_CONTAINER_DOMAIN: "ct-subdomain."
+      DNS_BASE_DOMAIN: "ns-fqdn.d.tld."
+      DNS_CONTAINER_DOMAIN: "ct-subdomain.d.tld."
     secrets:
       - db_pass
       - fernet_keys
@@ -140,7 +140,7 @@ services:
 
   nginx:
     restart: always
-    image: gui-image:latest
+    image: nginx:latest
     volumes:
       - ./sites-enabled:/etc/nginx/conf.d
       - webstatic:/data/django/static
