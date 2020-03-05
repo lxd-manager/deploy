@@ -49,6 +49,7 @@ services:
       DB_SERVICE: database
       CONF_CELERY_BROKER_URL: "redis://redis:6379"
       CONF_CELERY_RESULT_BACKEND: "redis://redis:6379"
+      SOCIAL_AUTH_GITLAB_API_URL: "https://localhost"
     secrets:
       - db_pass
       - fernet_keys
@@ -72,6 +73,7 @@ services:
       DB_SERVICE: database
       CONF_CELERY_BROKER_URL: "redis://redis:6379"
       CONF_CELERY_RESULT_BACKEND: "redis://redis:6379"
+      SOCIAL_AUTH_GITLAB_API_URL: "https://localhost"
     secrets:
       - db_pass
       - fernet_keys
@@ -92,6 +94,7 @@ services:
       DB_SERVICE: database
       CONF_CELERY_BROKER_URL: "redis://redis:6379"
       CONF_CELERY_RESULT_BACKEND: "redis://redis:6379"
+      SOCIAL_AUTH_GITLAB_API_URL: "https://localhost"
     secrets:
       - fernet_keys
       - db_pass

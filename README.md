@@ -87,10 +87,14 @@ The random passwords may be created by
 #### Gitlab OAuth
 
 To get the gitlab_id and _secret, create an gitlab application with the following parameters:
-- callback url:  https://ui-fqdn/social-auth/complete/gitlab/ 
+- callback url:  http://ui-fqdn/social-auth/complete/gitlab/ (here http is required as the callback url is not default https)
 - not trusted
 - confidential (_id and _secret remains at the server)
 - scopes: read_user
+
+set the gitlab url for the services beat, api, celery environments:
+ 
+    SOCIAL_AUTH_GITLAB_API_URL: "https://gitlab.yourdomain.com"
 
 ### Run
 
@@ -104,3 +108,8 @@ to create an admin user, execute
 ### Backup
 
 To get clean backups, run the `backup.sh` before a system snapshot to dump the database into the backup folder.
+
+### Usage
+
+With the admin account created above, you log in at https://ui-fqdn/admin 
+New users who authenticated once via oauth will now show up in the users list. They are by default blocked and require manual approval. This is performed by assigning the users the *Can view container* permission.
