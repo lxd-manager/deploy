@@ -34,7 +34,7 @@ services:
     restart: always
     # Docker hack to wait until Postgres is up, then run stuff.
     command: /usr/local/bin/celery -A ct_backend.celery worker
-    image: docker.pkg.github.com/lxd-manager/backend/api:latest
+    image: lxdmanager/backend:latest
     volumes:
       - ./certs:/data/django/certs
     networks:
@@ -59,7 +59,7 @@ services:
     restart: always
     # Docker hack to wait until Postgres is up, then run stuff.
     command: /usr/local/bin/celery -A ct_backend.celery beat
-    image: docker.pkg.github.com/lxd-manager/backend/api:latest
+    image: lxdmanager/backend:latest
     networks:
       - backend
     depends_on:
@@ -79,7 +79,7 @@ services:
       - social_auth_gitlab_secret
 
   api:
-    image: docker.pkg.github.com/lxd-manager/backend/api:latest
+    image: lxdmanager/backend:latest
     volumes:
       - webstatic:/data/django/static
       - ./certs:/data/django/certs
@@ -99,7 +99,7 @@ services:
       - social_auth_gitlab_secret
 
   dns:
-    image: docker.pkg.github.com/lxd-manager/backend/api:latest
+    image: lxdmanager/backend:latest
     networks:
       - backend
     command: python3 dns/server.py

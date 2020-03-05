@@ -21,8 +21,8 @@ This is the repository which helps with the deployment of the lxd-manager. It is
 
 The services are all dockerised and require a linux host with the following software
 
-- docker
-- docker-compose
+- docker https://docs.docker.com/install/linux/docker-ce/ubuntu/
+- docker-compose https://docs.docker.com/compose/install/
 
 ## Step-by-step guide
 
@@ -51,9 +51,12 @@ The proxy automatically generates Let's Encrypt TLS vertificates for the domain.
 The lxd api uses TLS client certificates as authentication mechanism. Therefore place a TLS key and (optionally self signed) certificate to `certs/lxd.key` and `certs/lxd.crt`.
 You add new hosts through the api, where you supply a trust password which is used to establish the certificate at the new host.
 
+    openssl req -x509 -newkey rsa:4096 -nodes -keyout certs/lxd.key -out certs/lxd.crt -days 3650
+
 ### DNS
 
 There is a DNS server which generates responses based on the containers available in the database. This requires you to set up a NS delegation of the subdomain `ct-subdomain.d.tld.` under which the containers will be named to a nameserver `ns-fqdn.d.tld.` which points to your deployment.
+Replace `server-ip` in the ports section with the external IP where the DNS server should listen. (If it is an IPv6 address omit \[ and \])
 
 #### Example
 
@@ -75,6 +78,28 @@ The services require credentials to communicate. For this purpose, please create
 - `secrets/db_encrypt` with 50 random alphanumeric characters (used to symmetrically encrypt the ssh host keys of the containers)
 - `secrets/gitlab_id` the id of the oauth application from gitlab
 - `secrets/gitlab_secret` the secret ot the oauth application
+
+The random passwords may be created by
+
+    head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/ct_postgres
+    head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/db_encrypt
+
+#### Gitlab OAuth
+
+To get the gitlab_id and _secret, create an gitlab application with the following parameters:
+- callback url:  https://ui-fqdn/social-auth/complete/gitlab/ 
+- not trusted
+- confidential (_id and _secret remains at the server)
+- scopes: read_user
+
+### Run
+
+    docker-compose pull
+    docker-compose up -d
+    
+to create an admin user, execute
+
+    docker-compose exec api python3 manage.py createsuperuser
 
 ### Backup
 
