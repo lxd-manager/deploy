@@ -1,0 +1,6 @@
+site_name: lxd-manager
+nav:
+    - Home: index.md
+    - Installation: install.md
+    - Host-Setup: host-setup.md
+theme: readthedocs
