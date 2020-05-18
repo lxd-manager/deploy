@@ -64,6 +64,7 @@ Your containers get FQDNs of the form `name.ct.example.net`
 The services require credentials to communicate. For this purpose, please create the following files unter `secrets/`:
 
 - `secrets/ct_postgres` with 50 random alphanumeric characters (used as Database password of the `ctapi` user)
+- `secrets/django_secret` with 50 random alphanumeric characters (used as django session secret)
 - `secrets/db_encrypt` with 50 random alphanumeric characters (used to symmetrically encrypt the ssh host keys of the containers)
 - `secrets/gitlab_id` the id of the oauth application from gitlab
 - `secrets/gitlab_secret` the secret ot the oauth application
@@ -71,6 +72,7 @@ The services require credentials to communicate. For this purpose, please create
 The random passwords may be created by
 
     head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/ct_postgres
+    head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/django_secret
     head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/db_encrypt
 
 #### Gitlab OAuth

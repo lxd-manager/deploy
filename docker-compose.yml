@@ -100,6 +100,7 @@ services:
       # DJANGO_DEBUG: 1
     secrets:
       - fernet_keys
+      - secret_key
       - db_pass
       - social_auth_gitlab_key
       - social_auth_gitlab_secret
@@ -181,6 +182,8 @@ networks:
 secrets:
   db_pass:
     file: secrets/ct_postgres
+  secret_key:
+    file: secrets/django_secret
   fernet_keys:
     file: secrets/db_encrypt
   social_auth_gitlab_key:

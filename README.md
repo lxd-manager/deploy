@@ -75,6 +75,7 @@ Your containers get FQDNs of the form `name.ct.example.net`
 
 The services require credentials to communicate. For this purpose, please create the following files unter `secrets/`:
 - `secrets/ct_postgres` with 50 random alphanumeric characters (used as Database password of the `ctapi` user)
+- `secrets/django_secret` with 50 random alphanumeric characters (used as secret key of django)
 - `secrets/db_encrypt` with 50 random alphanumeric characters (used to symmetrically encrypt the ssh host keys of the containers)
 - `secrets/gitlab_id` the id of the oauth application from gitlab
 - `secrets/gitlab_secret` the secret ot the oauth application
@@ -82,6 +83,7 @@ The services require credentials to communicate. For this purpose, please create
 The random passwords may be created by
 
     head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/ct_postgres
+    head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/django_secret
     head /dev/urandom | tr -dc A-Za-z0-9 | head -c 50 > secrets/db_encrypt
 
 #### Gitlab OAuth
@@ -108,6 +110,8 @@ to create an admin user, execute
 ### Backup
 
 To get clean backups, run the `backup.sh` before a system snapshot to dump the database into the backup folder.
+
+A backup is restored via the `restore.sh` script, which accepts a filename of a backup as argument. Please make sure, that your database is empty before restoring, i.e. stopping the `api` container which automatically applies migrations. 
 
 ### Usage
 
