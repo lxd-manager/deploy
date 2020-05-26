@@ -3,5 +3,6 @@ nav:
     - Home: index.md
     - Installation: install.md
     - Host-Setup: host-setup.md
+    - Monitoring: monitoring.md
     - Migration: migration.md
 theme: readthedocs

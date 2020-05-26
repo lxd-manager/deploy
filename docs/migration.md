@@ -47,12 +47,12 @@ Live migration of containers is possible, but not recommended.
 
 #### Host Keys
 Wait until the background synchronisation registered the new container. Once you know the ID, go to
-https://your-manager.tld/api/container/<ID>/import_keys/
+https://your-manager.tld/api/container/< ID >/import_keys/
 where you can paste the output of the host keys command.
 This allows to use the same host keys as before, but they are now managed by the application.
 
 #### Project
-Assign the container to a project to grant access to non-admin users at https://your-manager.tld/api/container/<ID>/ 
+Assign the container to a project to grant access to non-admin users at https://your-manager.tld/api/container/< ID >/ 
 
 You may then redeploy the keys to fully integrate the instance into lxd-manager.
 
