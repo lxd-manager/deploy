@@ -87,6 +87,9 @@ To get the gitlab_id and _secret, create an gitlab application with the followin
 set the gitlab url for the services beat, api, celery environments:
  
     SOCIAL_AUTH_GITLAB_API_URL: "https://gitlab.yourdomain.com"
+    
+As oauth provides authentication but no authorization, an administrator has to grant new users the required permissions after they first linked their oauth identity.
+This is performed by granting them the `Can view container` permission at `/admin/auth/user/`
 
 ### Run
 

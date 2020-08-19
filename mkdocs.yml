@@ -1,8 +1,13 @@
 site_name: lxd-manager
 nav:
     - Home: index.md
-    - Installation: install.md
-    - Host-Setup: host-setup.md
-    - Monitoring: monitoring.md
-    - Migration: migration.md
+    - User Guide:
+        - Overview: overview.md
+        - Containers: containers.md
+    - Admin Guide:
+        - Installation: install.md
+        - Host-Setup: host-setup.md
+        - Images: images.md
+        - Monitoring: monitoring.md
+        - Migration: migration.md
 theme: readthedocs
