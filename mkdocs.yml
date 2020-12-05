@@ -6,6 +6,7 @@ nav:
         - Containers: containers.md
     - Admin Guide:
         - Installation: install.md
+        - Dynamic DNS: dynamic-dns.md
         - Host-Setup: host-setup.md
         - Images: images.md
         - Monitoring: monitoring.md
